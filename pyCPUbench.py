@@ -1,3 +1,5 @@
+# Code by Sergio00166
+
 from time import sleep as delay
 from sys import argv
 from copy import deepcopy
