@@ -18,7 +18,6 @@ cube =\
     [[16, 202], [0, 202]],
     [[0, 192], [0, 202]]
 ]
-
 margin =\
 [
     [[0,0], [512,0]],
@@ -26,11 +25,11 @@ margin =\
     [[512,0], [512,384]],
     [[0,384], [512,384]]    
 ]
-
 vertex0 = [[[0, 197], [16, 197]]]
 vertex1 = [[[0, 202], [16, 192]]]
 vertex2 = [[[8, 192], [8, 202]]]
 vertex3 = [[[0, 192], [16, 202]]]
+
 
 
 """ DEFINE ALL RENDER/RASTER FUNCTIONS """
@@ -47,9 +46,7 @@ def fill_polygon(vertex):
                 round(y1+k*dy/distance)) for k in range(distance + 1)])
     return points_between
 
-
 def init_scr(x,y): return [[0]*(x+1) for _ in range(y+1)]
-
 
 def mid_points(vertex):
     x1, y1 = vertex[0]; x2, y2 = vertex[1]
@@ -61,7 +58,6 @@ def mid_points(vertex):
              round(y1+step_y*(i+1)))\
             for i in range(num_points)]
 
-
 def raster(vertex,vbuff,color=1, fill=False):
     buffer=deepcopy(vbuff)
     cords = list(set(tuple(coord) for sublist in vertex for coord in sublist))
@@ -70,15 +66,16 @@ def raster(vertex,vbuff,color=1, fill=False):
     for x in cords: buffer[x[1]][x[0]]=color
     return buffer
 
-
 def wk(x,vbuff):
     cube_moved = [ [[coord[0][0]+x, coord[0][1]],\
     [coord[1][0]+x, coord[1][1]]] for coord in cube ]
     vbuff = raster(cube_moved, vbuff, fill=True)
 
+
+
 """ BENCHMARKER FUNCTION """
 
-def compute(proc):
+def compute(cpu,max_time):
     vbuff = init_scr(512, 384)
     vbuff=raster(margin,vbuff)
     blank=deepcopy(vbuff)
@@ -94,17 +91,18 @@ def compute(proc):
             if cont>0: break
         x += speed
 
-    pool=Pool(processes=proc)
+    pool = Pool(processes=cpu)
     worker = partial(wk, vbuff=vbuff)
+    passes,elapsed,data = 0,0,data*cpu
 
-    passes=0; elapsed=0
     while True:
         proc=pool.map_async(worker,data)
-        start=time(); proc.get(); passes+=1
+        start=time(); proc.get()
         elapsed+=time()-start
-        if elapsed>30:
+        passes += 1
+        if elapsed>max_time:
             pool.close()
-            return passes/elapsed*10000
+            return passes/elapsed*10000*cpu
 
 
 
@@ -112,13 +110,13 @@ def compute(proc):
 
 def benchmark():
     delay(0.5); print(""); prog=""; percent=0
-    print("      Python SysBench v4.2 ",end="\n\n")
+    print("      Python SysBench v4.3 ",end="\n\n")
     print("\r  Running Single-Core benchmark... ",end="")
-    onec=int( compute(1) )
+    onec=int( compute(1,30) )
     print("DONE",end="");  delay(1)
     print("\r"+" "*64,end="")
     print("\r  Running Multi-Core benchmark... ",end="")
-    allc=int( compute( cpu_count() ) )
+    allc=int( compute( cpu_count(),30 ) )
     print("DONE",end="")
     delay(0.5)
     print("\r"+" "*64+"\r      Printing results... ",end="")
@@ -127,18 +125,15 @@ def benchmark():
     print("\r   Multi-Core  performance: "+str(allc)+"\n")
 
 
-def stress_thr():
-    while True: compute( cpu_count() )
-
 def stress():
     proc=[]
     print("\n   PYTHON BASED CPU STRESS-TEST\n")
     delay(0.33)
-    print("STARTING...",end="\r")
-    thr = Thread(target=stress_thr)
+    print("STARTING...",end="")
+    thr = Thread(target=compute, args=(cpu_count(),float('inf'),) )
     thr.daemon = True; thr.start()
     delay(2)
-    input("RUNNING. Press any key to stop . . .  ")
+    input("\rRUNNING. Press any key to stop . . .  ")
     exit(0)    
 
 
