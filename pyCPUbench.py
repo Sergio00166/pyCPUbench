@@ -143,4 +143,4 @@ if __name__=="__main__":
         if arg=="stress": stress()
         elif arg=="bench": benchmark()
         else: print("\n   USAGE: [stress || bench]\n")
-    else: benchmark()
+    else: stress()
