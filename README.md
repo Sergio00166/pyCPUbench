@@ -54,4 +54,3 @@ python cpu_bench.py bench
 
 ## 📜 License
 Distributed under the GPL License. See LICENSE for details.
-Use responsibly!
