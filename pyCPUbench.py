@@ -110,7 +110,7 @@ def compute(cpu,max_time):
 
 def benchmark():
     delay(0.5); print(""); prog=""; percent=0
-    print("      Python SysBench v4.3 ",end="\n\n")
+    print("      Python CPUBench v4.3 ",end="\n\n")
     print("\r  Running Single-Core benchmark... ",end="")
     onec=int( compute(1,30) )
     print("DONE",end="");  delay(1)
@@ -144,3 +144,4 @@ if __name__=="__main__":
         elif arg=="bench": benchmark()
         else: print("\n   USAGE: [stress || bench]\n")
     else: stress()
+
